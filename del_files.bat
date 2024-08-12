@@ -1,0 +1,9 @@
+del output
+del output.c
+del zrx_compiler
+del src/code_generator.o
+del src/lexer.o
+del src/main.o
+del src/parser.o
+del src/semantic_analyzer.o
+del new_directory
