@@ -1,5 +1,6 @@
 .DS_Store
-output
+./output
+test.zrx
 output.c
 zrx_compiler
 input.zrx
