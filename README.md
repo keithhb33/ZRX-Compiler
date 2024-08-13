@@ -32,7 +32,6 @@ This is a simple compiler for `.zrx` files that converts them into C code. The c
    ```bash
    ./zrx src/input.zrx
 
-
 ## Manual Steps
 
 1. **Build the Compiler:**
@@ -54,6 +53,3 @@ This is a simple compiler for `.zrx` files that converts them into C code. The c
 
    ```bash
    ./output
-
-
-
