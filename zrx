@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# Check if an input file is provided
+if [ -z "$1" ]; then
+    echo "Usage: zrx <input_file.zrx>"
+    exit 1
+fi
+
+make build
+make run
+gcc output.c -o output
+rm output.c
+./output
