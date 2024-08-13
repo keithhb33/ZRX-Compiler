@@ -52,25 +52,3 @@ This is a simple compiler for `.zrx` files that converts them into C code. The c
 
    ```bash
    zrx testFile.zrx
-   
-## Manual Steps
-
-1. **Build the Compiler:**
-
-   ```bash
-   make build
-
-2. **Run the Compiler:**
-
-   ```bash
-   make run
-
-3. **Compile the Generated C Code:**
-
-   ```bash
-   gcc output.c -o output
-
-4. **Run the Generated Program:**
-
-   ```bash
-   ./output
