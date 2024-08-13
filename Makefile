@@ -1,13 +1,13 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -std=c99
+CFLAGS = -Wall
+SRC = src/zrx_compiler.c
+OUT = zrx_compiler
 
-SRC = src/lexer.c src/parser.c src/semantic_analyzer.c src/code_generator.c src/main.c src/utility.c
-OBJ = $(SRC:.c=.o)
+build:
+	$(CC) $(CFLAGS) $(SRC) -o $(OUT)
 
-all: zrx_compiler
-
-zrx_compiler: $(OBJ)
-	$(CC) $(CFLAGS) -o zrx_compiler $(OBJ)
+run: build
+	./$(OUT)
 
 clean:
-	rm -f $(OBJ) zrx_compiler
+	rm -f $(OUT) output.c
