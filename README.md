@@ -37,11 +37,22 @@ This is a simple compiler for `.zrx` files that converts them into C code. The c
    CD ..
    MOVE testDir/main.py .
 
-2. **Compile and Run:**
+2. **Compile & Add to Path:**
 
+   Windows:
    ```bash
-   ./zrx input.zrx
+   ./install.bat
+   ```
+   Unix:
+   ```bash
+   sh install.sh
+   ```
 
+3. **Run .zrx file:**
+
+   zrx testFile.zrx
+
+   
 ## Manual Steps
 
 1. **Build the Compiler:**
