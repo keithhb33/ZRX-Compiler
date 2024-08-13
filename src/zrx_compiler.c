@@ -212,6 +212,12 @@ int main(int argc, char *argv[]) {
         exit(EXIT_FAILURE);
     }
 
+    // Check if the input .zrx file exists
+    if (access(argv[1], F_OK) != 0) {
+        fprintf(stderr, "Error: File '%s' does not exist.\n", argv[1]);
+        exit(EXIT_FAILURE);
+    }
+
     // Generate the base name without the .zrx extension
     char base_name[1024];
     strncpy(base_name, argv[1], sizeof(base_name) - 1);
