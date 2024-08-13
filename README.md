@@ -20,10 +20,8 @@ This is a simple compiler for `.zrx` files that converts them into C code. The c
 
 ## Project Structure
 
-- `input.zrx`: The input file containing `.zrx` commands.
 - `src/zrx_compiler.c`: The source code of the compiler.
-- `output.c`: The generated C file (after running the compiler).
-- `Makefile`: Script for building and running the project.
+- `testFile.zrx`: The .zrx file
 
 ## Usage
 
