@@ -84,15 +84,15 @@ void compile_zrx_to_c(const char *input_file, const char *output_file) {
             char text[256];
             sscanf(line, "ECHO \"%[^\"]\"", text);
             fprintf(output, "    printf(\"%%s\\n\", \"%s\");\n", text);
-        } else if (strncmp(line, "CD ..", 5) == 0) {
+        } else if (strncmp(line, "CD ..", 5) == 0 || strncmp(line, "CD..", 4) == 0) {
             fprintf(output, "    char *last_slash_%d = strrchr(current_path, '/');\n", unique_id);
             fprintf(output, "    if (last_slash_%d != NULL) *last_slash_%d = '\\0';\n", unique_id, unique_id);
             unique_id++;
         } else if (strncmp(line, "CD", 2) == 0) {
             char dir_name[256];
             sscanf(line, "CD \"%[^\"]\"", dir_name);
+            // Update the current_path variable with the new directory
             fprintf(output, "    snprintf(current_path, sizeof(current_path), \"%%s/%%s\", current_path, \"%s\");\n", dir_name);
-            fprintf(output, "    chdir(current_path);\n");
         }
     }
 
