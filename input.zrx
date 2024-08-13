@@ -1,8 +1,0 @@
-MKDIR "Test_Folder"
-MAKE "test_file.txt"
-ECHO "Created test_file.txt inside Test_Folder."
-MKDIR "Another_Folder"
-TOUCH "another_file.txt"
-ECHO "Created another_file.txt inside Another_Folder."
-RMDIR "Test_Folder"
-RMDIR "Another_Folder"
