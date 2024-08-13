@@ -27,7 +27,17 @@ This is a simple compiler for `.zrx` files that converts them into C code. The c
 
 ## Usage
 
-1. **Compile and Run:**
+1. **Write .zrx file:**
+
+   Example:
+   ```bash
+   MKDIR testDir
+   CD testDir
+   TOUCH main.py
+   CD ..
+   MOVE testDir/main.py .
+
+2. **Compile and Run:**
 
    ```bash
    ./zrx input.zrx

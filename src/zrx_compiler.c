@@ -100,18 +100,32 @@ void compile_zrx_to_c(const char *input_file, const char *output_file) {
             }
         } else if (strncmp(line, "MOVE", 4) == 0) {
             char source[256], destination[256];
+            int num_args;
+
             // Try parsing with quotes
-            if (sscanf(line, "MOVE \"%[^\"]\" \"%[^\"]\"", source, destination) == 2) {
-                matched = 1;
+            num_args = sscanf(line, "MOVE \"%[^\"]\" \"%[^\"]\"", source, destination);
+            if (num_args < 1) {
+                // If not quoted, try without quotes
+                num_args = sscanf(line, "MOVE %s %s", source, destination);
             }
-            // If not quoted, try without quotes
-            else if (sscanf(line, "MOVE %s %s", source, destination) == 2) {
-                matched = 1;
-            }
-            if (matched) {
+            
+            if (num_args >= 1) {
                 fprintf(output, "    char source_path_%d[1024], dest_path_%d[1024];\n", unique_id, unique_id);
                 fprintf(output, "    snprintf(source_path_%d, sizeof(source_path_%d), \"%%s/%%s\", current_path, \"%s\");\n", unique_id, unique_id, source);
-                fprintf(output, "    snprintf(dest_path_%d, sizeof(dest_path_%d), \"%%s/%%s\", current_path, \"%s\");\n", unique_id, unique_id, destination);
+
+                if (num_args == 1 || strcmp(destination, ".") == 0) {
+                    // No destination or destination is ".", move to current directory
+                    fprintf(output, "    snprintf(dest_path_%d, sizeof(dest_path_%d), \"%%s/%%s\", current_path, \"%s\");\n", unique_id, unique_id, strrchr(source, '/') ? strrchr(source, '/') + 1 : source);
+                } else if (num_args == 2) {
+                    // Check if the destination is a directory
+                    fprintf(output, "    struct stat st_%d;\n", unique_id);
+                    fprintf(output, "    snprintf(dest_path_%d, sizeof(dest_path_%d), \"%%s/%%s\", current_path, \"%s\");\n", unique_id, unique_id, destination);
+                    fprintf(output, "    if (stat(dest_path_%d, &st_%d) == 0 && S_ISDIR(st_%d.st_mode)) {\n", unique_id, unique_id, unique_id);
+                    fprintf(output, "        snprintf(dest_path_%d, sizeof(dest_path_%d), \"%%s/%%s/%%s\", current_path, \"%s\", \"%s\");\n", unique_id, unique_id, destination, strrchr(source, '/') ? strrchr(source, '/') + 1 : source);
+                    fprintf(output, "    }\n");
+                }
+
+                // Move the file
                 fprintf(output, "    rename(source_path_%d, dest_path_%d);\n", unique_id, unique_id);
                 unique_id++;
             }
@@ -150,6 +164,7 @@ void compile_zrx_to_c(const char *input_file, const char *output_file) {
         } else if (strncmp(line, "CD ..", 5) == 0 || strncmp(line, "CD..", 4) == 0) {
             fprintf(output, "    char *last_slash_%d = strrchr(current_path, '/');\n", unique_id);
             fprintf(output, "    if (last_slash_%d != NULL) *last_slash_%d = '\\0';\n", unique_id, unique_id);
+            //fprintf(output, "    chdir(current_path);\n"); // Change directory
             unique_id++;
         } else if (strncmp(line, "CD", 2) == 0) {
             char dir_name[256];
@@ -165,7 +180,7 @@ void compile_zrx_to_c(const char *input_file, const char *output_file) {
                 // Update the current_path variable with the new directory
                 fprintf(output, "    snprintf(current_path, sizeof(current_path), \"%%s/%%s\", current_path, \"%s\");\n", dir_name);
                 // Change the directory
-                fprintf(output, "    chdir(current_path);\n");
+                //fprintf(output, "    chdir(current_path);\n");
             }
         }
     }
