@@ -30,7 +30,7 @@ This is a simple compiler for `.zrx` files that converts them into C code. The c
 1. **Compile and Run:**
 
    ```bash
-   ./zrx src/input.zrx
+   ./zrx input.zrx
 
 ## Manual Steps
 

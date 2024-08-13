@@ -177,8 +177,13 @@ void compile_zrx_to_c(const char *input_file, const char *output_file) {
     fclose(output);
 }
 
-int main() {
-    compile_zrx_to_c("input.zrx", "output.c");
+int main(int argc, char *argv[]) {
+    if (argc < 2) {
+        fprintf(stderr, "Usage: %s <input_file.zrx>\n", argv[0]);
+        exit(EXIT_FAILURE);
+    }
+
+    compile_zrx_to_c(argv[1], "output.c");
     printf("Compilation complete. Output written to output.c\n");
     return 0;
 }
