@@ -5,6 +5,15 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+// Function to replace backslashes with forward slashes in a string
+void replace_backslashes(char *path) {
+    for (int i = 0; path[i] != '\0'; i++) {
+        if (path[i] == '\\') {
+            path[i] = '/';
+        }
+    }
+}
+
 void compile_zrx_to_c(const char *input_file, const char *output_file) {
     FILE *input = fopen(input_file, "r");
     FILE *output = fopen(output_file, "w");
@@ -19,6 +28,7 @@ void compile_zrx_to_c(const char *input_file, const char *output_file) {
         exit(EXIT_FAILURE);
     }
 
+    // Write standard includes to the output file
     fprintf(output, "#include <sys/stat.h>\n");
     fprintf(output, "#include <sys/types.h>\n");
     fprintf(output, "#include <unistd.h>\n");
@@ -26,7 +36,12 @@ void compile_zrx_to_c(const char *input_file, const char *output_file) {
     fprintf(output, "#include <stdlib.h>\n");
     fprintf(output, "#include <string.h>\n\n");
     fprintf(output, "int main() {\n");
-    fprintf(output, "    char current_path[1024] = \".\";\n\n");
+    
+    // Set up base and current paths
+    fprintf(output, "    char base_path[1024];\n");
+    fprintf(output, "    char current_path[1024] = \".\";\n");
+    fprintf(output, "    getcwd(base_path, sizeof(base_path));\n");
+    fprintf(output, "    char abs_path[1024];\n");
 
     char line[256];
     int unique_id = 0;
@@ -39,11 +54,11 @@ void compile_zrx_to_c(const char *input_file, const char *output_file) {
         if (strncmp(line, "MKDIR", 5) == 0) {
             if (sscanf(line, "MKDIR \"%[^\"]\"", folder_name) == 1) {
                 matched = 1;
-            }
-            else if (sscanf(line, "MKDIR %s", folder_name) == 1) {
+            } else if (sscanf(line, "MKDIR %s", folder_name) == 1) {
                 matched = 1;
             }
             if (matched) {
+                replace_backslashes(folder_name); // Replace backslashes with forward slashes
                 fprintf(output, "    char dest_path_%d[1024];\n", unique_id);
                 fprintf(output, "    snprintf(dest_path_%d, sizeof(dest_path_%d), \"%%s/%%s\", current_path, \"%s\");\n", unique_id, unique_id, folder_name);
                 fprintf(output, "    mkdir(dest_path_%d, 0777);\n", unique_id);
@@ -52,11 +67,11 @@ void compile_zrx_to_c(const char *input_file, const char *output_file) {
         } else if (strncmp(line, "RMDIR", 5) == 0) {
             if (sscanf(line, "RMDIR \"%[^\"]\"", folder_name) == 1) {
                 matched = 1;
-            }
-            else if (sscanf(line, "RMDIR %s", folder_name) == 1) {
+            } else if (sscanf(line, "RMDIR %s", folder_name) == 1) {
                 matched = 1;
             }
             if (matched) {
+                replace_backslashes(folder_name); // Replace backslashes with forward slashes
                 fprintf(output, "    char dest_path_%d[1024];\n", unique_id);
                 fprintf(output, "    snprintf(dest_path_%d, sizeof(dest_path_%d), \"%%s/%%s\", current_path, \"%s\");\n", unique_id, unique_id, folder_name);
                 fprintf(output, "    rmdir(dest_path_%d);\n", unique_id);
@@ -65,11 +80,11 @@ void compile_zrx_to_c(const char *input_file, const char *output_file) {
         } else if (strncmp(line, "TOUCH", 5) == 0 || strncmp(line, "MAKE", 4) == 0) {
             if (sscanf(line, "%*s \"%[^\"]\"", file_name) == 1) {
                 matched = 1;
-            }
-            else if (sscanf(line, "%*s %s", file_name) == 1) {
+            } else if (sscanf(line, "%*s %s", file_name) == 1) {
                 matched = 1;
             }
             if (matched) {
+                replace_backslashes(file_name); // Replace backslashes with forward slashes
                 fprintf(output, "    char dest_path_%d[1024];\n", unique_id);
                 fprintf(output, "    snprintf(dest_path_%d, sizeof(dest_path_%d), \"%%s/%%s\", current_path, \"%s\");\n", unique_id, unique_id, file_name);
                 fprintf(output, "    FILE *fp_%d = fopen(dest_path_%d, \"w\");\n", unique_id, unique_id);
@@ -79,11 +94,11 @@ void compile_zrx_to_c(const char *input_file, const char *output_file) {
         } else if (strncmp(line, "RM", 2) == 0) {
             if (sscanf(line, "RM \"%[^\"]\"", file_name) == 1) {
                 matched = 1;
-            }
-            else if (sscanf(line, "RM %s", file_name) == 1) {
+            } else if (sscanf(line, "RM %s", file_name) == 1) {
                 matched = 1;
             }
             if (matched) {
+                replace_backslashes(file_name); // Replace backslashes with forward slashes
                 fprintf(output, "    char dest_path_%d[1024];\n", unique_id);
                 fprintf(output, "    snprintf(dest_path_%d, sizeof(dest_path_%d), \"%%s/%%s\", current_path, \"%s\");\n", unique_id, unique_id, file_name);
                 fprintf(output, "    remove(dest_path_%d);\n", unique_id);
@@ -99,6 +114,9 @@ void compile_zrx_to_c(const char *input_file, const char *output_file) {
             }
 
             if (num_args >= 1) {
+                replace_backslashes(source); // Replace backslashes with forward slashes
+                replace_backslashes(destination); // Replace backslashes with forward slashes
+
                 fprintf(output, "    char source_path_%d[1024], dest_path_%d[1024];\n", unique_id, unique_id);
                 fprintf(output, "    snprintf(source_path_%d, sizeof(source_path_%d), \"%%s/%%s\", current_path, \"%s\");\n", unique_id, unique_id, source);
 
@@ -133,11 +151,13 @@ void compile_zrx_to_c(const char *input_file, const char *output_file) {
             char source[256], destination[256];
             if (sscanf(line, "COPY \"%[^\"]\" \"%[^\"]\"", source, destination) == 2) {
                 matched = 1;
-            }
-            else if (sscanf(line, "COPY %s %s", source, destination) == 2) {
+            } else if (sscanf(line, "COPY %s %s", source, destination) == 2) {
                 matched = 1;
             }
             if (matched) {
+                replace_backslashes(source); // Replace backslashes with forward slashes
+                replace_backslashes(destination); // Replace backslashes with forward slashes
+
                 fprintf(output, "    char source_path_%d[1024], dest_path_%d[1024];\n", unique_id, unique_id);
                 fprintf(output, "    snprintf(source_path_%d, sizeof(source_path_%d), \"%%s/%%s\", current_path, \"%s\");\n", unique_id, unique_id, source);
                 fprintf(output, "    snprintf(dest_path_%d, sizeof(dest_path_%d), \"%%s/%%s\", current_path, \"%s\");\n", unique_id, unique_id, destination);
@@ -150,8 +170,7 @@ void compile_zrx_to_c(const char *input_file, const char *output_file) {
             char text[256];
             if (sscanf(line, "ECHO \"%[^\"]\"", text) == 1) {
                 matched = 1;
-            }
-            else if (sscanf(line, "ECHO %s", text) == 1) {
+            } else if (sscanf(line, "ECHO %s", text) == 1) {
                 matched = 1;
             }
             if (matched) {
@@ -160,16 +179,26 @@ void compile_zrx_to_c(const char *input_file, const char *output_file) {
         } else if (strncmp(line, "CD ..", 5) == 0 || strncmp(line, "CD..", 4) == 0) {
             fprintf(output, "    char *last_slash_%d = strrchr(current_path, '/');\n", unique_id);
             fprintf(output, "    if (last_slash_%d != NULL) *last_slash_%d = '\\0';\n", unique_id, unique_id);
+            fprintf(output, "    if (strcmp(current_path, \".\") == 0) {\n");
+            fprintf(output, "        strcpy(current_path, base_path);\n");
+            fprintf(output, "        chdir(current_path);\n");
+            fprintf(output, "    } else if (strcmp(current_path, base_path) == 0) {\n");
+            fprintf(output, "        getcwd(abs_path, sizeof(abs_path));\n");
+            fprintf(output, "        char *last_slash_abs = strrchr(abs_path, '/');\n");
+            fprintf(output, "        if (last_slash_abs != NULL) *last_slash_abs = '\\0';\n");
+            fprintf(output, "        strcpy(current_path, abs_path);\n");
+            fprintf(output, "        chdir(current_path);\n");
+            fprintf(output, "    }\n");
             unique_id++;
         } else if (strncmp(line, "CD", 2) == 0) {
             char dir_name[256];
             if (sscanf(line, "CD \"%[^\"]\"", dir_name) == 1) {
                 matched = 1;
-            }
-            else if (sscanf(line, "CD %s", dir_name) == 1) {
+            } else if (sscanf(line, "CD %s", dir_name) == 1) {
                 matched = 1;
             }
             if (matched) {
+                replace_backslashes(dir_name); // Replace backslashes with forward slashes
                 fprintf(output, "    snprintf(current_path, sizeof(current_path), \"%%s/%%s\", current_path, \"%s\");\n", dir_name);
             }
         }
@@ -181,6 +210,7 @@ void compile_zrx_to_c(const char *input_file, const char *output_file) {
     fclose(input);
     fclose(output);
 }
+
 
 int main(int argc, char *argv[]) {
     if (argc < 2) {
