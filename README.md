@@ -46,7 +46,12 @@ This is a simple compiler for `.zrx` files that converts them into C code. The c
    sh install.sh
    ```
 
-3. **Run .zrx file:**
+3. **Compile & Run .zrx file:**
 
    ```bash
    zrx testFile.zrx
+
+4. **Run .zrx file:**
+
+   ```bash
+   ./output
